@@ -24,7 +24,6 @@ def register_visitor(request):
             national_id=request.POST.get('national_id') if nat_type == 'thai' else None,
             passport_number=request.POST.get('passport_number') if nat_type == 'foreigner' else None,
             
-            # ✅ รับค่าเป็น contact_number
             contact_number=request.POST.get('contact_number'), 
             
             device_code=request.POST.get('device_code'),
@@ -49,11 +48,12 @@ def dashboard(request):
         if visitors.exists():
             visitor = visitors.first()
             
+            # 🚨 [ปลดล็อคแล้ว] ดึงพิกัดทั้งหมดของรหัสอุปกรณ์นี้มาโชว์เลย ไม่สนใจเวลาลงทะเบียน
             logs = LocationLog.objects.filter(
-                device_code=visitor.device_code,
-                timestamp__gte=visitor.registered_at
+                device_code=visitor.device_code
             )
             
+            # ถ้าคืนอุปกรณ์แล้ว ให้ตัดจบเส้นทางแค่เวลาที่คืน (ถ้ามี)
             if not visitor.is_active and hasattr(visitor, 'returned_at') and visitor.returned_at:
                 logs = logs.filter(timestamp__lte=visitor.returned_at)
                 
