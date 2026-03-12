@@ -9,14 +9,13 @@ class Visitor(models.Model):
     national_id = models.CharField(max_length=13, null=True, blank=True)
     passport_number = models.CharField(max_length=20, null=True, blank=True)
     
-    # 🚨 เพิ่มบรรทัดนี้: ช่องเก็บเบอร์โทรศัพท์
-    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    # ✅ เปลี่ยนชื่อเป็น contact_number หลบ Error ตู้เซฟเก่า
+    contact_number = models.CharField(max_length=20, null=True, blank=True)
     
     device_code = models.CharField(max_length=50, db_index=True)
     is_active = models.BooleanField(default=True) # True=ยืมอยู่, False=คืนแล้ว
     registered_at = models.DateTimeField(auto_now_add=True)
     
-    # 🚨 สิ่งที่เพิ่มเข้ามา: ใช้ตีกรอบเวลา "สิ้นสุดทริป"
     returned_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

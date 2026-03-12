@@ -12,22 +12,9 @@
         .navbar-custom { background: linear-gradient(135deg, #1a237e 0%, #283593 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .card-custom { border: none; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
         #map { height: 550px; width: 100%; border-radius: 12px; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 1;}
-        
-        .pulse-icon {
-            display: block; width: 20px; height: 20px; border-radius: 50%; background: #dc3545;
-            border: 3px solid white; animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(220, 53, 69, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-        }
-        
-        /* 🚨 เพิ่มสไตล์สำหรับหมุดจุดเล็กๆ ทุก 5 นาที */
-        .waypoint-dot {
-            width: 12px; height: 12px; background-color: #ffb300; /* สีเหลืองทอง */
-            border: 2px solid #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-        }
+        .pulse-icon { display: block; width: 20px; height: 20px; border-radius: 50%; background: #dc3545; border: 3px solid white; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(220, 53, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); } }
+        .waypoint-dot { width: 12px; height: 12px; background-color: #ffb300; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
     </style>
 </head>
 <body>
@@ -67,7 +54,10 @@
                                 <ul class="list-unstyled mb-0 text-dark">
                                     <li class="mb-2"><i class="fas fa-calendar-alt me-2 text-muted"></i><strong>อายุ:</strong> {{ visitor.age }} ปี</li>
                                     <li class="mb-2"><i class="fas fa-globe-americas me-2 text-muted"></i><strong>สัญชาติ:</strong> {{ visitor.nationality_type|title }}</li>
-                                    <li class="mb-2"><i class="fas fa-microchip me-2 text-muted"></i><strong>รหัสอุปกรณ์:</strong> <span class="badge bg-dark px-2 py-1">{{ visitor.device_code }}</span></li>
+                                    
+                                    <li class="mb-2 mt-3"><i class="fas fa-phone-alt me-2 text-primary"></i><strong>เบอร์โทร:</strong> <span class="fw-bold">{{ visitor.contact_number|default:"-" }}</span></li>
+                                    
+                                    <li class="mb-2 mt-3"><i class="fas fa-microchip me-2 text-muted"></i><strong>รหัสอุปกรณ์:</strong> <span class="badge bg-dark px-2 py-1">{{ visitor.device_code }}</span></li>
                                 </ul>
                                 <div class="mt-3 pt-3 border-top border-secondary-subtle">
                                     <strong>สถานะ:</strong> 
@@ -110,69 +100,40 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
         var routeData = {{ route_json|safe }};
-        
         var map = L.map('map').setView([13.7649, 100.5383], 13);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap &copy; CARTO'
         }).addTo(map);
 
-        var startIcon = L.divIcon({
-            html: '<div class="custom-marker"><i class="fas fa-map-marker-alt fa-3x text-success"></i></div>',
-            className: '', iconSize: [30, 42], iconAnchor: [15, 42], popupAnchor: [0, -35]
-        });
-
-        var pulseIcon = L.divIcon({
-            html: '<span class="pulse-icon"></span>',
-            className: '', iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10]
-        });
-
-        // 🚨 ไอคอนสำหรับมาร์คเกอร์ทุกๆ 5 นาที (จุดสีเหลือง)
-        var dotIcon = L.divIcon({
-            html: '<div class="waypoint-dot"></div>',
-            className: '', iconSize: [12, 12], iconAnchor: [6, 6], popupAnchor: [0, -6]
-        });
+        var startIcon = L.divIcon({ html: '<div class="custom-marker"><i class="fas fa-map-marker-alt fa-3x text-success"></i></div>', className: '', iconSize: [30, 42], iconAnchor: [15, 42], popupAnchor: [0, -35] });
+        var pulseIcon = L.divIcon({ html: '<span class="pulse-icon"></span>', className: '', iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10] });
+        var dotIcon = L.divIcon({ html: '<div class="waypoint-dot"></div>', className: '', iconSize: [12, 12], iconAnchor: [6, 6], popupAnchor: [0, -6] });
 
         if(routeData && routeData.length > 0) {
-            
-            // สกัดเอาเฉพาะพิกัด [lat, lng] ไปวาดเส้น (ตัดเวลาออกก่อน)
             var latlngs = routeData.map(function(point) { return [point[0], point[1]]; });
-            
-            var polyline = L.polyline(latlngs, {
-                color: '#1a237e', weight: 5, opacity: 0.8, lineJoin: 'round'
-            }).addTo(map);
-            
+            var polyline = L.polyline(latlngs, { color: '#1a237e', weight: 5, opacity: 0.8, lineJoin: 'round' }).addTo(map);
             map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
 
-            // แปลงเวลาจุดเริ่มต้น
             var startTime = new Date(routeData[0][2]);
-            var lastMarkedTime = startTime.getTime(); // เก็บเวลาไว้เทียบ
+            var lastMarkedTime = startTime.getTime();
 
-            // 📍 1. ปักหมุดจุดเริ่มต้น (สีเขียว)
-            L.marker([routeData[0][0], routeData[0][1]], {icon: startIcon}).addTo(map)
-                .bindPopup("<b style='color:#28a745;'>📍 จุดเริ่มต้น</b><br>เวลา: " + startTime.toLocaleTimeString('th-TH'));
+            L.marker([routeData[0][0], routeData[0][1]], {icon: startIcon}).addTo(map).bindPopup("<b style='color:#28a745;'>📍 จุดเริ่มต้น</b><br>เวลา: " + startTime.toLocaleTimeString('th-TH'));
 
-            // ⏱️ 2. วนลูปเช็คเวลา ปักหมุดทุกๆ 5 นาที (ข้ามจุดแรกและจุดสุดท้ายไปก่อน)
             for (var i = 1; i < routeData.length - 1; i++) {
                 var currentTime = new Date(routeData[i][2]).getTime();
-                var timeDiffMinutes = (currentTime - lastMarkedTime) / (1000 * 60); // แปลงเป็นนาที
+                var timeDiffMinutes = (currentTime - lastMarkedTime) / (1000 * 60);
 
-                // ถ้าเวลาห่างจากจุดล่าสุดที่ปักหมุดไว้ >= 5 นาที
                 if (timeDiffMinutes >= 5) {
                     var passTime = new Date(routeData[i][2]);
-                    L.marker([routeData[i][0], routeData[i][1]], {icon: dotIcon}).addTo(map)
-                        .bindPopup("<b>⏱️ ผ่านจุดนี้เมื่อ</b><br>เวลา: " + passTime.toLocaleTimeString('th-TH'));
-                    
-                    lastMarkedTime = currentTime; // รีเซ็ตตัวจับเวลาใหม่
+                    L.marker([routeData[i][0], routeData[i][1]], {icon: dotIcon}).addTo(map).bindPopup("<b>⏱️ ผ่านจุดนี้เมื่อ</b><br>เวลา: " + passTime.toLocaleTimeString('th-TH'));
+                    lastMarkedTime = currentTime;
                 }
             }
 
-            // 🚨 3. ปักหมุดตำแหน่งล่าสุด (จุดแดงกะพริบ)
             if(routeData.length > 1) {
                 var lastIndex = routeData.length - 1;
                 var endTime = new Date(routeData[lastIndex][2]);
-                L.marker([routeData[lastIndex][0], routeData[lastIndex][1]], {icon: pulseIcon}).addTo(map)
-                    .bindPopup("<b style='color:#dc3545;'>🚨 จุดสิ้นสุด</b><br>เวลา: " + endTime.toLocaleTimeString('th-TH'))
-                    .openPopup(); // ให้จุดล่าสุดเด้งข้อความโชว์อัตโนมัติ
+                L.marker([routeData[lastIndex][0], routeData[lastIndex][1]], {icon: pulseIcon}).addTo(map).bindPopup("<b style='color:#dc3545;'>🚨 จุดสิ้นสุด</b><br>เวลา: " + endTime.toLocaleTimeString('th-TH')).openPopup();
             }
         }
     </script>

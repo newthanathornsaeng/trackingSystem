@@ -13,16 +13,10 @@
     <script>
         function toggleForm() {
             var isThai = document.getElementById('t_thai').checked;
-            
-            // จัดการช่องบัตร ปชช.
             document.getElementById('thai_sec').style.display = isThai ? 'block' : 'none';
             document.getElementById('national_id').required = isThai;
-            
-            // จัดการช่องพาสปอร์ต
             document.getElementById('for_sec').style.display = isThai ? 'none' : 'block';
             document.getElementById('passport_number').required = !isThai;
-            
-            // ล้างค่าข้อมูลเมื่อสลับแท็บ ป้องกันการส่งข้อมูลผิดช่อง
             if(isThai) {
                 document.getElementById('passport_number').value = '';
             } else {
@@ -31,26 +25,20 @@
         }
         function validateThaiID(input) {
             let id = input.value;
-            
-            // ถ้ากรอกไม่ครบ 13 หลัก ให้เคลียร์สถานะแจ้งเตือนไว้ก่อน (ปล่อยให้ HTML5 บังคับความยาวแทน)
             if (id.length !== 13) {
                 input.setCustomValidity('');
                 return;
             }
-
-            // สูตรคำนวณเช็คหลักที่ 13
             let sum = 0;
             for (let i = 0; i < 12; i++) {
                 sum += parseInt(id.charAt(i)) * (13 - i);
             }
             let checkDigit = (11 - (sum % 11)) % 10;
-
-            // เทียบผลลัพธ์ว่าตรงกับหลักที่ 13 ที่ผู้ใช้พิมพ์มาไหม
             if (checkDigit !== parseInt(id.charAt(12))) {
                 input.setCustomValidity('เลขบัตรประชาชนไม่ถูกต้อง (ตรวจสอบการพิมพ์ผิด)');
-                input.reportValidity(); // เด้งข้อความเตือนทันที
+                input.reportValidity(); 
             } else {
-                input.setCustomValidity(''); // ถูกต้อง! ผ่านได้
+                input.setCustomValidity(''); 
             }
         }
         window.onload = toggleForm;
@@ -63,17 +51,14 @@
                 <div class="mb-3">
                     <a href="{% url 'core:dashboard' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i> กลับหน้า Dashboard</a>
                 </div>
-                
                 <div class="card form-card">
                     <div class="card-body p-5">
                         <div class="text-center mb-5">
                             <h3 class="fw-bold" style="color: #1a237e;">แบบฟอร์มลงทะเบียนผู้ใช้งาน</h3>
                             <p class="text-muted">กรุณากรอกข้อมูลให้ครบถ้วนเพื่อผูกกับอุปกรณ์ติดตาม</p>
                         </div>
-
                         <form method="post" action="{% url 'core:register' %}">
                             {% csrf_token %}
-                            
                             <h6 class="text-primary fw-bold border-bottom pb-2 mb-3"><i class="fas fa-globe-asia me-2"></i>ส่วนที่ 1: ข้อมูลสัญชาติ (Nationality)</h6>
                             <div class="mb-4">
                                 <div class="form-check form-check-inline">
@@ -90,36 +75,23 @@
                             <div class="row mb-4">
                                 <div class="col-md-5 mb-3">
                                     <label class="form-label small text-muted">ชื่อ (First Name) *</label>
-                                    <input type="text" name="first_name" class="form-control" required 
-                                           oninput="this.value = this.value.replace(/[^a-zA-Zก-๙\s]/g, '')"
-                                           title="กรุณากรอกเฉพาะตัวอักษรเท่านั้น">
+                                    <input type="text" name="first_name" class="form-control" required oninput="this.value = this.value.replace(/[^a-zA-Zก-๙\s]/g, '')">
                                 </div>
                                 <div class="col-md-5 mb-3">
                                     <label class="form-label small text-muted">นามสกุล (Last Name) *</label>
-                                    <input type="text" name="last_name" class="form-control" required
-                                           oninput="this.value = this.value.replace(/[^a-zA-Zก-๙\s]/g, '')"
-                                           title="กรุณากรอกเฉพาะตัวอักษรเท่านั้น">
+                                    <input type="text" name="last_name" class="form-control" required oninput="this.value = this.value.replace(/[^a-zA-Zก-๙\s]/g, '')">
                                 </div>
                                 <div class="col-md-2 mb-3">
                                     <label class="form-label small text-muted">อายุ (Age) *</label>
-                                    <input type="number" name="age" class="form-control" required min="1" max="120"
-                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                    <input type="number" name="age" class="form-control" required min="1" max="120">
                                 </div>
-                                
                                 <div class="col-md-12 mt-2" id="thai_sec">
                                     <label class="form-label small text-muted text-danger fw-bold">เลขประจำตัวประชาชน 13 หลัก *</label>
-                                    
-                                    <input type="text" name="national_id" id="national_id" class="form-control" 
-                                           maxlength="13" minlength="13" placeholder="กรอกเลข 13 หลัก"
-                                           pattern="\d{13}" title="กรุณากรอกตัวเลขให้ครบ 13 หลัก"
-                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                                           onkeyup="validateThaiID(this)">
+                                    <input type="text" name="national_id" id="national_id" class="form-control" maxlength="13" minlength="13" placeholder="กรอกเลข 13 หลัก" oninput="this.value = this.value.replace(/[^0-9]/g, '')" onkeyup="validateThaiID(this)">
                                 </div>
                                 <div class="col-md-12 mt-2" id="for_sec" style="display: none;">
                                     <label class="form-label small text-muted text-danger fw-bold">หมายเลขพาสปอร์ต (Passport Number) *</label>
-                                    <input type="text" name="passport_number" id="passport_number" class="form-control" 
-                                           placeholder="กรอกหมายเลขพาสปอร์ต"
-                                           oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()">
+                                    <input type="text" name="passport_number" id="passport_number" class="form-control" placeholder="กรอกหมายเลขพาสปอร์ต" oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()">
                                 </div>
                             </div>
 
@@ -127,16 +99,14 @@
                             <div class="row mb-4">
                                 <div class="col-md-12 mb-3">
                                     <label class="form-label small text-muted">เบอร์โทรศัพท์นักท่องเที่ยว *</label>
-                                    <input type="tel" name="phone_number" class="form-control" required placeholder="08xxxxxxxx" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                    <input type="tel" name="contact_number" class="form-control" required placeholder="08xxxxxxxx" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                 </div>
                             </div>
 
                             <h6 class="text-primary fw-bold border-bottom pb-2 mb-3"><i class="fas fa-microchip me-2"></i>ส่วนที่ 3: ข้อมูลอุปกรณ์ (Device Integration)</h6>
                             <div class="mb-5">
                                 <label class="form-label small text-muted text-danger fw-bold">รหัสอุปกรณ์ติดตาม (Device ID) *</label>
-                                <input type="text" name="device_code" class="form-control form-control-lg bg-light text-primary fw-bold" 
-                                       placeholder="ตัวอย่าง: TRK001" required
-                                       oninput="this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '').toUpperCase()">
+                                <input type="text" name="device_code" class="form-control form-control-lg bg-light text-primary fw-bold" placeholder="ตัวอย่าง: TRK001" required oninput="this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '').toUpperCase()">
                             </div>
 
                             <div class="d-grid gap-2">

@@ -24,8 +24,8 @@ def register_visitor(request):
             national_id=request.POST.get('national_id') if nat_type == 'thai' else None,
             passport_number=request.POST.get('passport_number') if nat_type == 'foreigner' else None,
             
-            # 🚨 [เพิ่มใหม่] รับค่าเบอร์โทรศัพท์จากหน้าฟอร์ม
-            phone_number=request.POST.get('phone_number'), 
+            # ✅ รับค่าเป็น contact_number
+            contact_number=request.POST.get('contact_number'), 
             
             device_code=request.POST.get('device_code'),
             is_active=True
@@ -78,7 +78,6 @@ def return_device(request, visitor_id):
     visitor.save()
     return redirect('core:dashboard')
 
-# API รับข้อมูลจากบอร์ด Arduino (เวอร์ชันสอดแนมข้อมูล)
 @csrf_exempt
 def api_upload_log(request):
     device_code = request.GET.get('device_code')
@@ -89,7 +88,6 @@ def api_upload_log(request):
     if request.method == 'POST':
         raw_body = request.body.decode('utf-8', errors='ignore')
         
-        # 🚨 สั่งให้ปริ้นท์ข้อมูลดิบที่ส่งมาจาก Arduino ออกมาดูที่หน้าจอดำ (Terminal)
         print("\n========== 📥 DATA FROM ARDUINO ==========")
         print(raw_body)
         print("==========================================\n")
@@ -113,7 +111,6 @@ def api_upload_log(request):
                     time_raw = parts[3]
                     
                     try:
-                        # 🛠️ หั่นตัวเลขเวลาด้วยมือแบบตรงไปตรงมา ป้องกันปี 9032
                         date_str = str(date_raw).zfill(6)
                         time_str = str(time_raw).zfill(8)
                         
