@@ -9,6 +9,9 @@ class Visitor(models.Model):
     national_id = models.CharField(max_length=13, null=True, blank=True)
     passport_number = models.CharField(max_length=20, null=True, blank=True)
     
+    # 🚨 เพิ่มบรรทัดนี้: ช่องเก็บเบอร์โทรศัพท์
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    
     device_code = models.CharField(max_length=50, db_index=True)
     is_active = models.BooleanField(default=True) # True=ยืมอยู่, False=คืนแล้ว
     registered_at = models.DateTimeField(auto_now_add=True)

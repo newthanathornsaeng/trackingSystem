@@ -23,6 +23,10 @@ def register_visitor(request):
             nationality_type=nat_type,
             national_id=request.POST.get('national_id') if nat_type == 'thai' else None,
             passport_number=request.POST.get('passport_number') if nat_type == 'foreigner' else None,
+            
+            # 🚨 [เพิ่มใหม่] รับค่าเบอร์โทรศัพท์จากหน้าฟอร์ม
+            phone_number=request.POST.get('phone_number'), 
+            
             device_code=request.POST.get('device_code'),
             is_active=True
         )
